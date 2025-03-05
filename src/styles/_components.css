@@ -2,9 +2,6 @@
   @apply bg-slate-500;
 }
 
-.exit {
-  @apply absolute w-full h-[63px] bg-gray-100 bottom-0 flex items-center justify-between px-3;
-}
 
 .chat {
   @apply h-[68px];

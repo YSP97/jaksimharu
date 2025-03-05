@@ -1,10 +1,10 @@
-import { getStorageData } from '@/utils';
 import getDetailedAddress from '@/utils/getDetailedAddress';
 import React, { useEffect, useState, useRef } from 'react';
 import Script from 'react-load-script';
 import { Link } from 'react-router-dom';
 import SearchBar from '../SearchBar';
 import TrackLocation from './TrackLocation';
+import pb from '@/api/pb';
 
 function StudyMap() {
   const [places, setPlaces] = useState([]); // 장소 데이터 저장
@@ -12,7 +12,7 @@ function StudyMap() {
   const mapRef = useRef(null); // 지도 객체를 저장할 ref
   const markersRef = useRef([]); // 마커들을 저장할 ref
 
-  const authUser = getStorageData('authInfo').user;
+  const authUser = pb.authStore.model;
 
   // Kakao Map API 로드 후 지도 생성
   const handleScriptLoad = () => {
@@ -155,9 +155,14 @@ function StudyMap() {
         <ul className="pb-[60px]">
           {places.map((place, index) => (
             <li key={index} className="flex flex-col border-b p-3">
-              <Link to={place.place_url} className="text-base font-bold">
+              <a
+                href={place.place_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-base font-bold"
+              >
                 {place.place_name}
-              </Link>
+              </a>
               <span className="text-sm text-gray-300">
                 {place.road_address_name || place.address_name}
               </span>

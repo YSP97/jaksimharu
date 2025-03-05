@@ -1,10 +1,10 @@
 import useChatListStore from '@/stores/useChatListStore';
 import { memo } from 'react';
 
-function HamburgerIcon() {
+function HamburgerIcon({onClick}) {
   const setModal = useChatListStore((s) => s.setToggleModal);
   return (
-    <button type="button" onClick={setModal} aria-label="참여중인 이웃 보기">
+    <button type="button" onClick={onClick} aria-label="참여중인 이웃 보기">
       <svg className="w-5 h-5">
         <use href="/stack.svg#hamburger" />
       </svg>

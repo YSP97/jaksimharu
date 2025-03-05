@@ -1,56 +1,45 @@
-import { memo, useEffect, useRef, useState } from 'react';
-import { gsap } from 'gsap';
+import { memo, useEffect, useRef } from 'react';
 import pb from '@/api/pb';
-import clsx from 'clsx';
 import { useNavigate } from 'react-router-dom';
 import CancelIcon from './CancelIcon';
-import { array, bool, string } from 'prop-types';
-import ChatExitNav from './ChatExitNav';
+import { array, bool, func, string } from 'prop-types';
 import ChatUser from './ChatUser';
+import gsap from 'gsap';
 
 ChatModal.propTypes = {
   isOpened: bool.isRequired,
   users: array,
   roomId: string,
   authUserId: string,
+  onClose: func,
 };
 
-function ChatModal({ isOpened, users, roomId, authUserId }) {
-  const [isAnimating, setIsAnimating] = useState(false);
+function ChatModal({ users, roomId, authUserId, onClose }) {
   const modalRef = useRef(null);
-  const [wasOpened, setWasOpened] = useState(false);
   const navigate = useNavigate();
 
+  // 모달 열릴 때 body 스크롤 막기
   useEffect(() => {
-    if (!wasOpened && isOpened) {
-      setWasOpened(true);
-    }
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, []);
 
-    if (isOpened && wasOpened) {
-      setIsAnimating(true);
-      gsap.fromTo(
-        modalRef.current,
-        { x: '100%' },
-        {
-          x: '0%',
-          duration: 0.5,
-          ease: 'power3.out',
-          onComplete: () => setIsAnimating(false),
-        }
-      );
-    } else if (!isOpened && wasOpened) {
-      setIsAnimating(true);
+  const handleClose = () => {
+    if (modalRef.current) {
       gsap.to(modalRef.current, {
-        x: '100%',
-        duration: 0.5,
+        duration: 0.3,
         ease: 'power3.in',
-        onComplete: () => setIsAnimating(false),
+        onComplete: () => onClose(),
       });
+    } else {
+      onClose();
     }
-  }, [isOpened, wasOpened]);
+  };
 
-
-  const handleExit = async () => {
+  const handleExit = async (e) => {
+    e.stopPropagation();
     if (confirm('채팅방을 나가시겠습니까?')) {
       try {
         const roomData = await pb.collection('ChatRooms').getOne(roomId);
@@ -72,29 +61,57 @@ function ChatModal({ isOpened, users, roomId, authUserId }) {
 
   return (
     <div
-      ref={modalRef}
-      className={clsx(
-        'bg-white w-[266px] h-screen fixed top-0 right-0 z-50 shadow-lg',
-        {
-          hidden: !isOpened && !isAnimating,
-        }
-      )}
+      className="fixed inset-0 bg-black/50 z-[99] flex items-center justify-center"
+      onClick={handleClose}
     >
-      <div className="flex flex-row justify-between border-b p-2">
-        <h3 className="text-[14px]">참여중인 이웃</h3>
-        <CancelIcon />
+      <div
+        ref={modalRef}
+        className="bg-white max-w-[300px] w-full max-h-[500px] h-full shadow-lg flex flex-col rounded-lg"
+      >
+        <div className="flex flex-col flex-grow overflow-y-auto">
+          <div className="flex flex-row justify-between border-b p-2">
+            <h3 className="text-[14px]">참여중인 이웃</h3>
+            <CancelIcon onClose={handleClose} />
+          </div>
+          {users.map((user) => (
+            <ChatUser
+              key={user.id}
+              userName={user.nickname}
+              userImg={
+                user.avatar
+                  ? pb.files.getUrl(user, user.avatar)
+                  : '/favicon.svg'
+              }
+              userLink={`/profile/${user.id}`}
+            />
+          ))}
+        </div>
+
+        <div className="w-full h-[63px] bg-gray-100 flex items-center justify-between px-3 rounded-b-lg">
+          <button
+            type="button"
+            onClick={handleExit}
+            aria-label="채팅방 나가기"
+            title="채팅방 나가기"
+          >
+            <svg className="w-[26px] h-[26px]">
+              <use href="/stack.svg#exit" />
+            </svg>
+          </button>
+          <div className="flex gap-4">
+            <button type="button">
+              <svg className="w-[26px] h-[26px]">
+                <use href="/stack.svg#chatAlarm" />
+              </svg>
+            </button>
+            <button type="button">
+              <svg className="w-[26px] h-[26px]">
+                <use href="/stack.svg#setting" />
+              </svg>
+            </button>
+          </div>
+        </div>
       </div>
-      {users.map((user) => (
-        <ChatUser
-          key={user.id}
-          userName={user.nickname}
-          userImg={
-            user.avatar ? pb.files.getUrl(user, user.avatar) : '/favicon.svg'
-          }
-          userLink={`/profile/${user.id}`}
-        />
-      ))}
-      <ChatExitNav handleExit={handleExit} />
     </div>
   );
 }

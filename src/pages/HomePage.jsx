@@ -2,10 +2,10 @@ import pb from '@/api/pb';
 import { BannerSwiper } from '@/components';
 import { CategoryNav, StudyPostItem } from '@/components/Board';
 import useCategoryStore from '@/stores/useCategoryStore';
-import { getStorageData } from '@/utils';
 import extractCityDistrict from '@/utils/extractCityDistrict';
 import { useCallback, useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
+import { Navigate } from 'react-router-dom';
 import { FadeLoader } from 'react-spinners';
 
 export default function HomePage() {
@@ -20,7 +20,13 @@ export default function HomePage() {
     (state) => state.setSelectedCategory
   );
 
-  const user = getStorageData('authInfo').user;
+  const user = pb.authStore.model;
+
+  if (!user) {
+    // 혹시 로그아웃 상태면 로그인 페이지로 보내기
+    Navigate('/login');
+    return null; // 혹은 로딩 처리
+  }
   const userLocation = extractCityDistrict(user.address);
 
   const studyListFetch = useCallback(async () => {

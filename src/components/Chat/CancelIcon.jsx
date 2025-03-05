@@ -1,10 +1,13 @@
-import useChatListStore from '@/stores/useChatListStore';
 import { memo } from 'react';
+import { func } from 'prop-types';
 
-function CancelIcon() {
-  const setModal = useChatListStore((s) => s.setToggleModal);
+CancelIcon.PropTypes = {
+  onClose: func,
+};
+
+function CancelIcon({ onClose }) {
   return (
-    <button type="button" onClick={setModal}>
+    <button type="button" onClick={onClose}>
       <svg className="w-4 h-4">
         <use href="/stack.svg#close" />
       </svg>

@@ -10,8 +10,13 @@ function ChatExitNav({ handleExit }) {
     handleExit?.();
   };
   return (
-    <div className="exit">
-      <button type="button" onClick={handleClick}>
+    <div className="w-full h-[63px] bg-gray-100 flex items-center justify-between px-3 absolute bottom-0 z-40">
+      <button
+        type="button"
+        onClick={handleClick}
+        aria-label="채팅방 나가기"
+        title="채팅방 나가기"
+      >
         <svg className="w-[26px] h-[26px]">
           <use href="/stack.svg#exit" />
         </svg>

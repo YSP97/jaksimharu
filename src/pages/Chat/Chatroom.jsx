@@ -15,12 +15,10 @@ import { getChatNoticeTime } from '@/utils';
 import { formatTime } from '@/utils/formatTime';
 
 export default function Chatroom() {
-  const open = useChatListStore((s) => s.isOpenedModal);
   const { studyPosts, fetchStudyPosts } = useChatListStore((s) => ({
     studyPosts: s.studyPosts,
     fetchStudyPosts: s.fetchStudyPosts,
   }));
-  const bgClass = clsx(open ? 'bg-[#46464699] opacity-65' : 'bg-white');
   let { roomId } = useParams();
 
   if (roomId.includes('}')) {
@@ -29,6 +27,7 @@ export default function Chatroom() {
 
   const [room, setRoom] = useState({ user: [], roomName: '채팅방' });
   const [users, setUsers] = useState([]);
+    const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     pb.collection('ChatRooms')
@@ -90,6 +89,13 @@ export default function Chatroom() {
     ? `${getChatNoticeTime(studyPost.date)} ${formatTime(studyPost.time)}`
     : null;
 
+
+  const handleModalToggle = () => {
+    setIsOpen(!isOpen);
+  };
+
+  
+
   return (
     <>
       <Helmet>
@@ -103,41 +109,37 @@ export default function Chatroom() {
           }
         />
       </Helmet>
-      <div className={`w-full min-h-[630px] flex flex-col relative`}>
-        <div className={`h-full flex-grow relative`}>
-          <div className="absolute h-screen right-0 top-0 max-w-[430px] w-full">
-            <ChatModal
-              isOpened={open}
-              users={users}
-              roomId={roomId}
-              authUserId={authUserId}
+      <div className={`flex flex-col relative overflow-hidden`}>
+        <div className="fixed top-0 max-w-[428px] w-full bg-white">
+          <ChatHeader
+            title={studyPost ? studyPost.title : roomTitle}
+            people={userCount}
+            onClick={handleModalToggle}
+          />
+          <div className="px-3 pt-2 pb-[1px]">
+            <ChatNotice
+              notice={creatTime}
+              linkTo={studyPost && `/home/study-detail/${studyPost.id}`}
             />
-            <div className="fixed top-0 max-w-[428px] w-full bg-white">
-              <ChatHeader
-                title={studyPost ? studyPost.title : roomTitle}
-                people={userCount}
-              />
-              <div className="px-3 flex justify-center pt-2 pb-[1px] w-full">
-                <ChatNotice
-                  notice={creatTime}
-                  linkTo={studyPost && `/home/study-detail/${studyPost.id}`}
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className={`h-screen`}>
-            <div className="h-hull pt-[110px]">
-              <ChatBoard roomId={roomId} users={users} studyPost={studyPost} />
-            </div>
-            <div className="fixed max-w-[428px] w-full bottom-0 bg-white px-2">
-              <SendMessageBar
-                onSend={handleSend}
-                placeholder={'메세지 보내기'}
-              />
-            </div>
           </div>
         </div>
+
+        <div>
+          <div className="pt-[110px]">
+            <ChatBoard roomId={roomId} users={users} studyPost={studyPost} />
+          </div>
+          <div className="fixed max-w-[428px] w-full bottom-0 bg-white px-2 z-30">
+            <SendMessageBar onSend={handleSend} placeholder={'메세지 보내기'} />
+          </div>
+        </div>
+
+        {isOpen && (
+          <ChatModal
+            users={users}
+            roomId={roomId}
+            onClose={handleModalToggle}
+          />
+        )}
       </div>
     </>
   );

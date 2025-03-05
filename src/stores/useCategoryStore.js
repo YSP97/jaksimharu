@@ -1,6 +1,5 @@
 import { create } from 'zustand';
 import pb from '@/api/pb';
-import { getStorageData } from '@/utils';
 
 const useCategoryStore = create((set) => ({
   categories: [],
@@ -10,7 +9,7 @@ const useCategoryStore = create((set) => ({
 
   fetchCategories: async () => {
     set({ isLoading: true, error: null });
-    const user = getStorageData('authInfo')?.user;
+    const user = pb.authStore.model;
 
     if (!user) {
       console.error('사용자 정보가 없습니다.');

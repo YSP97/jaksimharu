@@ -1,44 +1,43 @@
-import { userSignIn } from '@/api/user';
 import { InputText, NormalButton } from '@/components';
-import { getStorageData, setStorageData } from '@/utils/';
 import { isValidEmail, isValidLoginPwd } from '@/utils/validation';
 import { useCallback, useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import toast, { Toaster } from 'react-hot-toast';
 import { Link, useNavigate } from 'react-router-dom';
+import pb from '@/api/pb';
 
 export default function Login() {
-  const AUTH_KEY = 'authInfo';
   const navigate = useNavigate();
   const [formState, setFormState] = useState({
     email: '',
     password: '',
   });
 
-  // 로그인 완료시 /home으로 이동
+  // 로그인 여부 확인(홈으로 이동)
   useEffect(() => {
-    const authInfo = getStorageData(AUTH_KEY);
-    if (authInfo?.token) {
+    if (pb.authStore.isValid) {
       navigate('/home');
     }
   }, [navigate]);
 
+  // 로그인 처리
   const handleSignIn = useCallback(
     async (e) => {
       e.preventDefault();
 
       try {
         const { email, password } = formState;
-        const authData = await userSignIn(email, password);
-        const { record: user, token } = authData;
+
+        const authData = await pb
+          .collection('users')
+          .authWithPassword(email, password);
+        const { record: user } = authData;
 
         if (!user.verified) {
           toast.error('이메일 인증 메일을 확인해주세요.');
           return;
         }
 
-        const authInfo = { user, token };
-        setStorageData(AUTH_KEY, authInfo);
         navigate('/home');
       } catch (error) {
         if (error.message.includes('Failed to authenticate.')) {

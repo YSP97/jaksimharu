@@ -10,7 +10,6 @@ import {
   ProfileImg,
 } from '@/components/MyPage';
 import useProfileStore from '@/stores/useProfileStore';
-import { getStorageData } from '@/utils';
 import useAgreementStore from '@/stores/useAgreementStore';
 import { toast, Toaster } from 'react-hot-toast';
 
@@ -30,7 +29,7 @@ function ProfileDetail() {
     allChecked: s.allChecked,
   }));
 
-  const [form] = useState(getStorageData('authInfo').user);
+  const [form] = useState(pb.authStore.model);
   const [imageFile, setImageFile] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
   const [, setInputData] = useState({ job, license, nickname });
