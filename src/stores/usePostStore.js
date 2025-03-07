@@ -10,6 +10,8 @@ const usePostStore = create((set) => ({
       .getFirstListItem(`id="${id}"`);
     set({ post: result });
   },
+
+  
   setReplies: async (id) => {
     const repliesData = await pb.collection('Question_Replies').getFullList({
       filter: `post="${id}"`,

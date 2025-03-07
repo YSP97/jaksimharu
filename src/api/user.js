@@ -25,7 +25,6 @@ export async function userSignIn(email, password) {
 
 export async function signOut() {
   pb.authStore.clear();
-  removeStorageData('authInfo');
 
   console.log('로그아웃됨!');
 }

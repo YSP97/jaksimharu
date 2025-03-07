@@ -1,5 +1,4 @@
 import pb from '@/api/pb';
-import { getStorageData } from '@/utils';
 import { string, func, object } from 'prop-types';
 import { memo, useState } from 'react';
 
@@ -12,7 +11,7 @@ Reply.propTypes = {
 };
 
 function Reply({ content, replyId, onDelete, onUpdate, replyUser }) {
-  const authUser = getStorageData('authInfo').user;
+  const authUser = pb.authStore.model;
   const authUserId = authUser.id; // 현재 로그인된 사용자 ID
 
   const [isEditing, setIsEditing] = useState(false);

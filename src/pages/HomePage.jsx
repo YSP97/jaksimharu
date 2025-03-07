@@ -11,10 +11,8 @@ import { FadeLoader } from 'react-spinners';
 export default function HomePage() {
   const [studyList, setStudyList] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isCategoryLoading, setIsCategoryLoading] = useState(true);
 
   const categories = useCategoryStore((state) => state.categories);
-  const fetchCategories = useCategoryStore((state) => state.fetchCategories);
   const selectedCategory = useCategoryStore((state) => state.selectedCategory);
   const setSelectedCategory = useCategoryStore(
     (state) => state.setSelectedCategory
@@ -23,10 +21,11 @@ export default function HomePage() {
   const user = pb.authStore.model;
 
   if (!user) {
-    // 혹시 로그아웃 상태면 로그인 페이지로 보내기
+    // 로그아웃 상태면 로그인 페이지로 보내기
     Navigate('/login');
     return null; // 혹은 로딩 처리
   }
+
   const userLocation = extractCityDistrict(user.address);
 
   const studyListFetch = useCallback(async () => {
@@ -57,27 +56,14 @@ export default function HomePage() {
   }, [userLocation, categories]);
 
   useEffect(() => {
-    if (categories.length === 0) {
-      setIsCategoryLoading(true);
-      fetchCategories().finally(() => {
-        setIsCategoryLoading(false);
-      });
-    } else {
-      setIsCategoryLoading(false);
-    }
-  }, [fetchCategories, categories]);
-
-  useEffect(() => {
-    if (!isCategoryLoading) {
-      studyListFetch();
-    }
-  }, [studyListFetch, isCategoryLoading]);
+    studyListFetch();
+  }, [studyListFetch]);
 
   const filteredStudyList = selectedCategory
     ? studyList.filter((item) => item.category === selectedCategory)
     : studyList;
 
-  if (isLoading || isCategoryLoading) {
+  if (isLoading) {
     return (
       <div className="h-[80vh] flex justify-center items-center">
         <FadeLoader color="#79b2d1" />

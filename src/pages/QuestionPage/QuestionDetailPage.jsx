@@ -7,7 +7,6 @@ import { useParams } from 'react-router-dom';
 import { FadeLoader } from 'react-spinners';
 import usePostStore from '@/stores/usePostStore';
 import pb from '@/api/pb';
-import { getStorageData } from '@/utils';
 
 export default function QuestionDetailPage() {
   const param = useParams();
@@ -31,7 +30,7 @@ export default function QuestionDetailPage() {
   // 게시글 아이디
   const id = param.postId;
 
-  const userData = getStorageData('authInfo').user;
+  const userData = pb.authStore.model;
 
   // 현재 로그인된 auth 유저 아이디
   const userID = userData.id;
@@ -65,7 +64,7 @@ export default function QuestionDetailPage() {
   // 선택된 카테고리 아이디
   const selectedCategoryId = post.category;
 
-  // 카테고리 불러오기
+  /* 카테고리 가져오기 */
   useEffect(() => {
     if (selectedCategoryId) {
       pb.collection('Categories')
@@ -90,6 +89,7 @@ export default function QuestionDetailPage() {
     );
   }
 
+  /* 댓글 작성 */
   const handleReply = (value) => {
     const newData = {
       reply: value,
@@ -98,22 +98,24 @@ export default function QuestionDetailPage() {
     };
 
     pb.collection('Question_Replies')
-      .create(newData)
+      .create(newData, { expand: 'user' })
       .then((createdReply) => {
-        addReply(createdReply); // 댓글 추가
+        addReply(createdReply);
       });
   };
 
+  /* 댓글 삭제 */
   const handleDeleteReply = (replyId) => {
     if (confirm('정말 삭제하시겠습니까?')) {
       pb.collection('Question_Replies')
         .delete(replyId)
         .then(() => {
-          deleteReply(replyId); // 댓글 삭제
+          deleteReply(replyId);
         });
     }
   };
 
+  /* 댓글 수정 */
   const handleUpdateReply = (replyId, newContent) => {
     updateReply(replyId, newContent);
   };
